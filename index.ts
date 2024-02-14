@@ -5,13 +5,16 @@ import accountRoute from "./routes/AccountController";
 
 const app = express();
 const server = new Server(app);
-const port: number = 3000;
+const port: number = 8080;
 
 app.use(express.json());
 app.use(cors);
 app.use(accountRoute);
-//use static files
 app.use(express.static('static'));
+
+app.get('*', (req, res) => {
+	res.sendFile('index.html', {root: 'static'});
+});
 
 server.listen(port, () => {
 	console.log(`Server running at http://localhost:${port}/`);
