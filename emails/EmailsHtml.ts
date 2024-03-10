@@ -1,5 +1,6 @@
-import Account, {AccountDto} from "../models/Account";
+import Account from "../models/Account";
 import RejectData from "../models/RejectData";
+import {AccountDto} from "../models/AccountDto";
 
 export const NewAccountEmail = (account: AccountDto) => {
 	return `<main style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -44,7 +45,7 @@ export const RejectedEmail = (data: RejectData) => {
             </main>`
 }
 
-export const FirstApproveEmail = (account: Account) => {
+export const FirstApproveEmail = (path: string) => {
 	return `<main style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
 				<img src="" style="width: 100%; height: auto;" alt="Banner">
 				<div style="background-color: #f4f4f4; padding: 20px;">
@@ -53,7 +54,7 @@ export const FirstApproveEmail = (account: Account) => {
 						Su cuenta ha sido aprobada en la primera fase. A continuación, se le solicita que envíe una foto de su cédula de identidad en donde aparezca usted y su cédula de identidad, para poder continuar con el proceso de aprobación.<br>
 						Esto se hace con el fin de verificar que la persona que solicita la cuenta es la misma que aparece en la cédula de identidad.
 					</p>
-					<a href="http://18.225.55.123:8080/subir-cedula-de-identidad/${account.id}" style="display: block; background-color: #007bff; color: #fff; text-decoration: none; padding: 10px 20px; text-align: center; border-radius: 5px; margin-top: 20px;">Subir cédula de identidad</a>
+					<a href="http://localhost:8080/subir-cedula-de-identidad/${path}" style="display: block; background-color: #007bff; color: #fff; text-decoration: none; padding: 10px 20px; text-align: center; border-radius: 5px; margin-top: 20px;">Subir cédula de identidad</a>
 				</div>
 			</main>`
 }

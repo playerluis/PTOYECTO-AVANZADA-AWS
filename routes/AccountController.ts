@@ -1,18 +1,24 @@
 import {Router} from 'express';
-import Account, {AccountDto} from '../models/Account';
+import Account from '../models/Account';
 import RejectData from "../models/RejectData";
-import {approveAccountFirst, approveIdentity, getAccounts, getAccountsPendingIdentity, getNewAccounts, getPictureStream, Metadata, permitUploadPicture, rejectAccount, saveAccount, uploadPicture} from "../services/AccountService";
+import {approveAccountFirst, approveIdentity, getAccounts, getAccountsPendingIdentity, getNewAccounts, getPictureStream, permitUploadPicture, rejectAccount, saveAccount, uploadPicture} from "../services/AccountService";
 import {Response} from "express-serve-static-core";
 import {UploadedFile} from "express-fileupload";
-import {GridFSBucketReadStream} from "mongodb";
+import {AccountDto} from "../models/AccountDto";
 
 const router = Router();
 
-
-// @ts-ignore
 function sendError(res: Response, error: Error | unknown): void {
-	console.error(error);
-	res.status(500).send({message: error instanceof Error ? error.message : 'Algo salió mal'});
+	if (error instanceof Error) {
+		console.log(error.message);
+		res.status(401).send({message: error.message});
+	} else if ('string' === typeof error) {
+		console.log(error);
+		res.status(401).send({message: error});
+	} else {
+		console.log(error);
+		res.status(500).send({message: 'Error desconocido'});
+	}
 }
 
 router.post('/account/new', async (req, res) => {
@@ -66,10 +72,12 @@ router.post('/account/upload-picture/:id', async (req, res) => {
 	try {
 		const file = req.files?.file as UploadedFile;
 		const id = req.params.id;
+		
 		if (!file) {
 			res.status(400).send({message: 'No se envió ninguna imagen'});
 			return;
 		}
+
 		await uploadPicture(file, id);
 		res.status(200).send({message: 'Comprobante de identidad enviado con exito'});
 	} catch (error) {
@@ -123,10 +131,10 @@ router.get('/picture/:id', async (req, res) => {
 	console.log('Get picture');
 	try {
 		const id = req.params.id;
-		const [stream, metadata]: [GridFSBucketReadStream, Metadata] = await getPictureStream(id);
-		res.setHeader('Content-Type', metadata.contentType);
-		res.setHeader('Content-Disposition', `attachment; filename="${metadata.originalName}"`);
-		stream.pipe(res);
+		await getPictureStream(id, res, metadata => {
+			res.setHeader('Content-Type', metadata.contentType);
+			res.setHeader('Content-Disposition', `inline; filename="${metadata.originalName}"`);
+		});
 	} catch (error) {
 		sendError(res, error);
 	}
